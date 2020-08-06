@@ -29,7 +29,7 @@ m_map*		init_mem(size_t , int );
 
 void*			alloc_mem(m_map*);
 
-void			release_mem(void*, m_map*);
+void*			release_mem(void*, m_map*);
 
 void			extend_mem( m_map**, m_granule**);
 

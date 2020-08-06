@@ -1,16 +1,10 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include "m_map.h"
 
-	//memory manage
 
-// Types node
-//			com_line	
-//			link_node
-
-	
 	m_granule* make_granule(){
 		m_granule* mem = malloc( sizeof( *mem) );
 		if(mem==NULL){
@@ -25,8 +19,9 @@
 	m_granule* alloc_granule(m_map* map, void* address){
 		
 		m_granule* new_mem 		= make_granule();
-		if( new_mem==NULL){ printf(" alloc granule erro\n");
-		exit(0);
+		if( new_mem==NULL){ 
+			printf(" alloc granule erro\n");
+			exit(0);
 		}
 		new_mem->address			= address;
 		if( map->list_end==NULL){
@@ -65,17 +60,34 @@
 			return mem;
 	}
 	
+	void** calloc_mem(m_map* heap, size_t size){
+	
+		char* address		= heap->list_start->address;
+		m_granule* list	= heap->list_start;
+		size_t count		= 0;
+		
+		while( count != size){
+		
+			if(list->next->address == address++) {
+				list = list->next;
+				address++;
+				count++;
+			}else{
+				count = 0;
+			}
+		
+		}
+	
+	}
+	
 	void* alloc_mem(m_map* heap){
 		if( heap==NULL){
 			printf(" alloc_mem err: NULL HEAP\n");
 			exit(0);
 		}
 		if ( heap->list_start->next == NULL) {
-	//		printf(" end of list \n");
-			//printf(" extending memory \n");
 			extend_mem(&heap, &heap->list_end);
 		}
-		
 		void* mem ;
 		mem					= (void*)heap->list_start->address;
 		heap->list_start	= heap->list_start->next;
@@ -84,18 +96,19 @@
 		return mem;
 	}
 	
-	void release_mem(void* address,m_map*  heap){
+	void* release_mem(void* address,m_map*  heap){
+		void* add = (char*) address;
 		if( heap==NULL) {
 			printf("release_mem: null heap\n");
 			exit(0);
 		}
 		heap->list_start				= heap->list_start->previous;
 		heap->list_start->address 	= address;
-		address=NULL;
-		
+		*((void**)address)=NULL;
 	}
 	
 	void extend_mem(m_map** heap, m_granule** end){
+	
 		m_map* arena;
 		arena 									= init_mem((*heap)->var_size, 2000);
 		arena->var_size						= (*heap)->var_size;
